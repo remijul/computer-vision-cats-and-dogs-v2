@@ -27,11 +27,8 @@ jobs:
         image: postgres:15  # Version PostgreSQL utilisée
         env:
           POSTGRES_PASSWORD: postgres  # Mot de passe administrateur
-          # POSTGRES_PASSWORD: ${{ secrets.DB_PWD }}  # Mot de passe administrateur
           POSTGRES_USER: postgres     # Utilisateur de base de données
-          #POSTGRES_USER: ${{ secrets.DB_USER }}     # Utilisateur de base de données
           POSTGRES_DB: postgres       # Nom de la base de données
-          #POSTGRES_DB: ${{ secrets.DB_NAME }}       # Nom de la base de données
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -83,15 +80,23 @@ jobs:
     # Étape 5 : Tests de la base de données
     - name: Test database
       run: |
+        # Arrête le script si une commande échoue 
+        set -e
+
         # Exécution des tests de connexion et structure de la base de données
         python tests/test_db_simple.py
     
     # Étape 6 : Tests de l'API
     - name: Test API
       run: |
+        # Arrête le script si une commande échoue 
+        set -e
+
         # Démarrage de l'API en arrière-plan (&)
         python scripts/run_api.py &
+        
         # Attente de 10 secondes pour que l'API soit complètement démarrée
         sleep 10
+        
         # Exécution des tests d'intégration de l'API
         python tests/test_api_simple.py
