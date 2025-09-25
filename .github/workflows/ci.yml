@@ -26,9 +26,12 @@ jobs:
       postgres:
         image: postgres:15  # Version PostgreSQL utilisée
         env:
-          POSTGRES_PASSWORD: ${{ secrets.DB_PWD }}  # Mot de passe administrateur
-          POSTGRES_USER: ${{ secrets.DB_USER }}     # Utilisateur de base de données
-          POSTGRES_DB: ${{ secrets.DB_NAME }}       # Nom de la base de données
+          POSTGRES_PASSWORD: postgres  # Mot de passe administrateur
+          # POSTGRES_PASSWORD: ${{ secrets.DB_PWD }}  # Mot de passe administrateur
+          POSTGRES_USER: postgres     # Utilisateur de base de données
+          #POSTGRES_USER: ${{ secrets.DB_USER }}     # Utilisateur de base de données
+          POSTGRES_DB: postgres       # Nom de la base de données
+          #POSTGRES_DB: ${{ secrets.DB_NAME }}       # Nom de la base de données
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -58,6 +61,8 @@ jobs:
     
     # Étape 4 : Préparation de l'environnement de test
     - name: Setup test environment
+      env:
+        PGPASSWORD: postgres
       run: |
         # Création des répertoires nécessaires pour les tests
         mkdir -p data/processed/models
