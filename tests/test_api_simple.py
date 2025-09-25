@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT_DIR))
 from config.settings import API_CONFIG
 
 # Configuration des tests
-BASE_URL = f"http://{API_CONFIG["host"]}:{API_CONFIG["port"]}"
+BASE_URL = f"http://{API_CONFIG['host']}:{API_CONFIG['port']}"
 
 def test_quick_api_health():
     """Test très rapide de santé de l'API"""

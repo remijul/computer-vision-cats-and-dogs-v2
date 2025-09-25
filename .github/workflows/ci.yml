@@ -19,6 +19,7 @@ jobs:
       DB_NAME: ${{ secrets.DB_NAME }}
       DB_USER: ${{ secrets.DB_USER }}
       DB_PWD: ${{ secrets.DB_PWD }}
+      DB_TABLE_MONITORING: ${{ secrets.DB_TABLE_MONITORING }}
     
     # Service PostgreSQL temporaire pour les tests
     services:
@@ -67,9 +68,9 @@ jobs:
 
         # Attendre que PostgreSQL soit complètement prêt
         sleep 5
-        
+
         # Création/configuration de la base de données avec votre script
-        python src/database/db_creator.py || echo "db_creator.py a échoué, on continue..."
+        python src/database/db_creator.py
 
         # Création de la table predictions_feedback dans PostgreSQL
         python src/database/table_creator.py
