@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Informations - Cats vs Dogs Classifier{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Informations sur le modèle
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Spécifications techniques</h5>
+                        <table class="table table-striped">
+                            <tr>
+                                <td><strong>Nom du modèle</strong></td>
+                                <td>{{ model_info.name }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Version</strong></td>
+                                <td>{{ model_info.version }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Architecture</strong></td>
+                                <td>CNN (Convolutional Neural Network)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Taille d'entrée</strong></td>
+                                <td>{{ model_info.input_size }} pixels</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Classes</strong></td>
+                                <td>{{ model_info.classes|join(', ') }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Paramètres</strong></td>
+                                <td>{{ "{:,}".format(model_info.parameters) }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>État du modèle</h5>
+                        <div class="alert alert-{% if model_info.model_loaded %}success{% else %}danger{% endif %}">
+                            <h6>
+                                {% if model_info.model_loaded %}
+                                    <i class="bi bi-check-circle"></i> Modèle opérationnel
+                                {% else %}
+                                    <i class="bi bi-x-circle"></i> Modèle non disponible
+                                {% endif %}
+                            </h6>
+                            {% if model_info.model_loaded %}
+                                <p>Le modèle est chargé et prêt pour les prédictions.</p>
+                            {% else %}
+                                <p>Le modèle n'est pas disponible. Vérifiez que l'entraînement a été effectué.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <h6>Description</h6>
+                        <p>{{ model_info.description }}</p>
+                        
+                        <h6>Utilisation recommandée</h6>
+                        <ul>
+                            <li>Images claires de chats ou chiens</li>
+                            <li>Formats supportés: JPG, PNG, JPEG</li>
+                            <li>Résolution optimale: 128x128 ou plus</li>
+                            <li>Animaux bien visibles dans l'image</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Architecture du modèle</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-arrow-right text-primary"></i> <strong>Couche d'entrée:</strong> Images 128x128x3</li>
+                            <li><i class="bi bi-arrow-right text-primary"></i> <strong>Data Augmentation:</strong> Rotation, Flip, Zoom</li>
+                            <li><i class="bi bi-arrow-right text-primary"></i> <strong>Conv2D:</strong> 32, 64, 128 filtres</li>
+                            <li><i class="bi bi-arrow-right text-primary"></i> <strong>Pooling:</strong> MaxPooling2D</li>
+                            <li><i class="bi bi-arrow-right text-primary"></i> <strong>GlobalAveragePooling</strong></li>
+                            <li><i class="bi bi-arrow-right text-primary"></i> <strong>Dropout:</strong> 50%</li>
+                            <li><i class="bi bi-arrow-right text-primary"></i> <strong>Dense:</strong> Sortie sigmoid</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">Performance attendue</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h3 class="text-success">85-90%</h3>
+                                <p class="mb-0">Précision<br><small class="text-muted">Sur dataset test</small></p>
+                            </div>
+                            <div class="col-6">
+                                <h3 class="text-info">&lt;100ms</h3>
+                                <p class="mb-0">Temps<br><small class="text-muted">Par prédiction</small></p>
+                            </div>
+                        </div>
+                        <hr>
+                        <p class="text-muted small">
+                            <strong>Note:</strong> Performances variables selon la qualité des images et la complexité des poses.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">API Usage</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6>Endpoint de prédiction</h6>
+                        <code>POST /api/predict</code>
+                        
+                        <h6 class="mt-3">Headers requis</h6>
+                        <pre class="bg-light p-2"><code>Authorization: Bearer CAT&DOGS!
+Content-Type: multipart/form-data</code></pre>
+                        
+                        <h6 class="mt-3">Exemple de réponse</h6>
+                        <pre class="bg-light p-2"><code>{
+  "filename": "chat.jpg",
+  "prediction": "Cat",
+  "confidence": "87.34%",
+  "probabilities": {
+    "cat": "87.34%",
+    "dog": "12.66%"
+  }
+}</code></pre>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Liens utiles</h6>
+                        <div class="d-grid gap-2">
+                            <a href="/inference" class="btn btn-primary">
+                                <i class="bi bi-upload"></i> Tester le modèle
+                            </a>
+                            <a href="/docs" target="_blank" class="btn btn-outline-primary">
+                                <i class="bi bi-book"></i> Documentation API
+                            </a>
+                            <a href="/" class="btn btn-outline-secondary">
+                                <i class="bi bi-house"></i> Retour accueil
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Informations techniques supplémentaires</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6>Framework</h6>
+                        <p>TensorFlow/Keras</p>
+                        
+                        <h6>Optimiseur</h6>
+                        <p>Adam (lr=0.001)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Fonction de perte</h6>
+                        <p>Binary Crossentropy</p>
+                        
+                        <h6>Métriques</h6>
+                        <p>Accuracy</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Dataset</h6>
+                        <p>Microsoft Cats vs Dogs</p>
+                        
+                        <h6>Validation</h6>
+                        <p>Split 80/20</p>
+                    </div>
+                </div>
+                
+                <div class="alert alert-light mt-3">
+                    <h6><i class="bi bi-lightbulb"></i> Conseils d'utilisation</h6>
+                    <ul class="mb-0">
+                        <li>Utilisez des images de bonne qualité pour de meilleurs résultats</li>
+                        <li>Assurez-vous que l'animal est clairement visible</li>
+                        <li>Évitez les images avec plusieurs animaux</li>
+                        <li>Les images trop sombres ou floues peuvent réduire la précision</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

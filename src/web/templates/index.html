@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil - Cats vs Dogs Classifier{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto text-center">
+        <h1 class="display-4 mb-4">
+            <i class="bi bi-camera-fill text-primary"></i>
+            Cats vs Dogs Classifier
+        </h1>
+        <p class="lead mb-4">
+            Intelligence artificielle pour la classification d'images de chats et chiens<br>
+            <small class="text-muted">Propulsé par TensorFlow & Keras</small>
+        </p>
+        
+        <!-- Logos des frameworks -->
+        <div class="d-flex justify-content-center align-items-center mb-5 gap-4">
+            <div class="text-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Tensorflow_logo.svg" 
+                    alt="TensorFlow" 
+                    style="height: 50px; width: auto;">
+                <p class="small mt-2 mb-0 text-muted">TensorFlow</p>
+            </div>
+            <div class="text-center mx-3">
+                <span class="text-muted fs-2">+</span>
+            </div>
+            <div class="text-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/ae/Keras_logo.svg" 
+                    alt="Keras" 
+                    style="height: 50px; width: auto;">
+                <p class="small mt-2 mb-0 text-muted">Keras</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100 card-hover shadow">
+            <div class="card-body text-center">
+                <i class="bi bi-upload display-4 text-primary mb-3"></i>
+                <h5 class="card-title">Prédiction d'Image</h5>
+                <p class="card-text">
+                    Uploadez une image et découvrez s'il s'agit d'un chat ou d'un chien
+                </p>
+                <a href="/inference" class="btn btn-primary">
+                    <i class="bi bi-arrow-right"></i> Essayer
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100 card-hover shadow">
+            <div class="card-body text-center">
+                <i class="bi bi-info-circle display-4 text-success mb-3"></i>
+                <h5 class="card-title">Informations Modèle</h5>
+                <p class="card-text">
+                    Détails techniques sur l'architecture et les performances
+                </p>
+                <a href="/info" class="btn btn-success">
+                    <i class="bi bi-arrow-right"></i> En savoir plus
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100 card-hover shadow">
+            <div class="card-body text-center">
+                <i class="bi bi-code-square display-4 text-warning mb-3"></i>
+                <h5 class="card-title">API Documentation</h5>
+                <p class="card-text">
+                    Documentation interactive pour développeurs
+                </p>
+                <a href="/docs" target="_blank" class="btn btn-warning">
+                    <i class="bi bi-arrow-right"></i> API Docs
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-gear"></i> Comment utiliser l'API</h5>
+            </div>
+            <div class="card-body">
+                <ol>
+                    <li>Obtenir le token d'authentification : <code>?C@TS&D0GS!</code></li>
+                    <li>Envoyer une requête POST à <code>/api/predict</code></li>
+                    <li>Inclure l'image dans le body et le token dans les headers</li>
+                    <li>Recevoir la prédiction avec le niveau de confiance</li>
+                </ol>
+                
+                <div class="mt-3">
+                    <h6>Exemple cURL :</h6>
+                    <pre class="bg-dark text-light p-3 rounded"><code>curl -X POST "http://localhost:8000/api/predict" \
+     -H "Authorization: Bearer ?C@TS&D0GS!" \
+     -F "file=@mon_image.jpg"</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cats vs Dogs Classifier{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover:hover { transform: translateY(-5px); transition: all 0.3s; }
+        .result-card { border-left: 4px solid #28a745; }
+        .status-indicator { 
+            display: inline-block; 
+            width: 12px; 
+            height: 12px; 
+            border-radius: 50%; 
+            margin-right: 8px;
+        }
+        .status-ok { background-color: #28a745; }
+        .status-error { background-color: #dc3545; }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark gradient-bg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-stars"></i> Cats vs Dogs Classifier
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/"><i class="bi bi-house"></i> Accueil</a>
+                <a class="nav-link" href="/info"><i class="bi bi-info-circle"></i> Informations</a>
+                <a class="nav-link" href="/inference"><i class="bi bi-upload"></i> Prédiction</a>
+                <a class="nav-link" href="/monitoring"><i class="bi bi-graph-up"></i> Monitoring</a>
+                <a class="nav-link" href="/docs" target="_blank"><i class="bi bi-book"></i> API Docs</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-5">
+        {% if model_loaded is defined %}
+        <div class="alert alert-{% if model_loaded %}success{% else %}warning{% endif %} alert-dismissible fade show" role="alert">
+            <span class="status-indicator {% if model_loaded %}status-ok{% else %}status-error{% endif %}"></span>
+            {% if model_loaded %}
+                Modèle chargé et prêt pour les prédictions
+            {% else %}
+                Attention : Modèle non disponible
+            {% endif %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <div class="container">
+            <p>&copy; 2025 Cats vs Dogs Classifier - Projet Éducatif IA</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

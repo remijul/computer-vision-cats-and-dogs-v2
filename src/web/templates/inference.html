@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}Prédiction - Cats vs Dogs Classifier{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-upload"></i> Prédiction d'Image
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if not model_loaded %}
+                <div class="alert alert-danger">
+                    <strong>Erreur :</strong> Le modèle n'est pas disponible. Impossible de faire des prédictions.
+                </div>
+                {% else %}
+                <form id="predictionForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="imageFile" class="form-label">Choisir une image</label>
+                        <input type="file" class="form-control" id="imageFile" accept="image/*" required>
+                        <div class="form-text">Formats supportés: JPG, PNG, JPEG</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="apiToken" class="form-label">Token API</label>
+                        <input type="password" class="form-control" id="apiToken" value="?C@TS&D0GS!" required>
+                    </div>
+                    
+                    <!-- Section RGPD -->
+                    <div class="mb-3 p-3 bg-light border-start border-warning border-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rgpdConsent">
+                            <label class="form-check-label" for="rgpdConsent">
+                                <strong>Consentement RGPD :</strong> J'accepte que mes données (nom du fichier, feedback et commentaire) soient stockées à des fins de monitoring et d'amélioration du service. Aucune information personnelle n'est collectée (application RGPD frienldy 😉).
+                            </label>
+                        </div>
+                        <div class="form-text">
+                            <small><i class="bi bi-info-circle"></i> Sans votre consentement, seules les métriques anonymes seront enregistrées.</small>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="predictBtn">
+                        <i class="bi bi-magic"></i> Prédire
+                    </button>
+                </form>
+                
+                <div id="imagePreview" class="mt-4" style="display: none;">
+                    <h6>Aperçu de l'image:</h6>
+                    <img id="previewImg" class="img-fluid rounded shadow" style="max-height: 300px;">
+                </div>
+                
+                <div id="loading" class="text-center mt-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    <p class="mt-2">Analyse en cours...</p>
+                </div>
+                
+                <div id="result" class="mt-4" style="display: none;"></div>
+                
+                <!-- Section Feedback utilisateur -->
+                <div id="feedbackSection" class="mt-4 p-3 bg-light rounded" style="display: none;">
+                    <h6><i class="bi bi-chat-left-text"></i> Votre avis nous intéresse !</h6>
+                    <p class="mb-2">Êtes-vous satisfait du résultat ?</p>
+                    <div class="btn-group mb-3" role="group">
+                        <button type="button" class="btn btn-outline-success" onclick="submitFeedback(1)">
+                            <i class="bi bi-hand-thumbs-up"></i> Satisfait
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" onclick="submitFeedback(0)">
+                            <i class="bi bi-hand-thumbs-down"></i> Pas satisfait
+                        </button>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="userComment" class="form-label">Commentaire optionnel</label>
+                        <textarea class="form-control" id="userComment" rows="3" placeholder="Partagez votre expérience..."></textarea>
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="submitComment()">
+                        <i class="bi bi-send"></i> Envoyer le commentaire
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variable globale pour stocker l'ID du feedback
+let currentFeedbackId = null;
+
+// Prévisualisation de l'image
+document.getElementById('imageFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('imagePreview');
+            const img = document.getElementById('previewImg');
+            img.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Soumission du formulaire de prédiction
+document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const fileInput = document.getElementById('imageFile');
+    const tokenInput = document.getElementById('apiToken');
+    const rgpdConsent = document.getElementById('rgpdConsent').checked;
+    const loading = document.getElementById('loading');
+    const result = document.getElementById('result');
+    const feedbackSection = document.getElementById('feedbackSection');
+    const predictBtn = document.getElementById('predictBtn');
+    
+    const file = fileInput.files[0];
+    const token = tokenInput.value;
+    
+    if (!file) {
+        alert('Veuillez sélectionner une image');
+        return;
+    }
+    
+    // Affichage du loading
+    loading.style.display = 'block';
+    result.style.display = 'none';
+    feedbackSection.style.display = 'none';
+    predictBtn.disabled = true;
+    
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('rgpd_consent', rgpdConsent);
+        
+        const response = await fetch('/api/predict', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            const isDog = data.prediction === 'Dog';
+            const emoji = isDog ? '🐶' : '🐱';
+            const bgColor = isDog ? 'bg-warning' : 'bg-success';
+            
+            // Stockage de l'ID du feedback
+            currentFeedbackId = data.feedback_id;
+            
+            // Affichage du résultat
+            result.innerHTML = `
+                <div class="alert ${bgColor} result-card">
+                    <h5>${emoji} Résultat de la prédiction</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Prédiction:</strong> ${data.prediction}<br>
+                            <strong>Confiance:</strong> ${data.confidence}<br>
+                            <strong>Fichier:</strong> ${data.filename}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Probabilités détaillées:</strong><br>
+                            🐱 Chat: ${data.probabilities.cat}<br>
+                            🐶 Chien: ${data.probabilities.dog}
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small><i class="bi bi-clock"></i> Temps d'inférence: ${data.inference_time_ms} ms</small>
+                    </div>
+                </div>
+            `;
+            result.style.display = 'block';
+            
+            // Affichage de la section feedback si RGPD accepté
+            if (rgpdConsent && currentFeedbackId) {
+                feedbackSection.style.display = 'block';
+            }
+            
+        } else {
+            result.innerHTML = `
+                <div class="alert alert-danger">
+                    <h6>Erreur</h6>
+                    <p>${data.detail || 'Erreur inconnue'}</p>
+                </div>
+            `;
+            result.style.display = 'block';
+        }
+        
+    } catch (error) {
+        result.innerHTML = `
+            <div class="alert alert-danger">
+                <h6>Erreur de connexion</h6>
+                <p>${error.message}</p>
+            </div>
+        `;
+        result.style.display = 'block';
+    }
+    
+    loading.style.display = 'none';
+    predictBtn.disabled = false;
+});
+
+// Fonction pour soumettre le feedback (satisfait/pas satisfait)
+async function submitFeedback(feedbackValue) {
+    if (!currentFeedbackId) {
+        alert('Aucune prédiction active');
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('feedback_id', currentFeedbackId);
+        formData.append('user_feedback', feedbackValue);
+        
+        const response = await fetch('/api/update-feedback', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const feedbackText = feedbackValue === 1 ? 'Merci pour votre retour positif ! 👍' : 'Merci pour votre retour. Nous allons nous améliorer ! 💪';
+            
+            // Affichage d'un message de confirmation
+            const feedbackSection = document.getElementById('feedbackSection');
+            const confirmMessage = document.createElement('div');
+            confirmMessage.className = 'alert alert-success mt-2';
+            confirmMessage.innerHTML = `<i class="bi bi-check-circle"></i> ${feedbackText}`;
+            feedbackSection.appendChild(confirmMessage);
+            
+            // Désactivation des boutons de feedback
+            const feedbackButtons = feedbackSection.querySelectorAll('.btn-group button');
+            feedbackButtons.forEach(btn => btn.disabled = true);
+            
+        } else {
+            alert('Erreur lors de l\'envoi du feedback');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur de communication avec le serveur');
+    }
+}
+
+// Fonction pour soumettre le commentaire
+async function submitComment() {
+    if (!currentFeedbackId) {
+        alert('Aucune prédiction active');
+        return;
+    }
+    
+    const commentInput = document.getElementById('userComment');
+    const comment = commentInput.value.trim();
+    
+    if (!comment) {
+        alert('Veuillez saisir un commentaire');
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('feedback_id', currentFeedbackId);
+        formData.append('user_comment', comment);
+        
+        const response = await fetch('/api/update-feedback', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            // Message de confirmation
+            const feedbackSection = document.getElementById('feedbackSection');
+            const confirmMessage = document.createElement('div');
+            confirmMessage.className = 'alert alert-info mt-2';
+            confirmMessage.innerHTML = '<i class="bi bi-envelope-check"></i> Commentaire envoyé avec succès ! Merci 📝';
+            feedbackSection.appendChild(confirmMessage);
+            
+            // Vider et désactiver le champ commentaire
+            commentInput.value = '';
+            commentInput.disabled = true;
+            
+        } else {
+            alert('Erreur lors de l\'envoi du commentaire');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur de communication avec le serveur');
+    }
+}
+</script>
+{% endblock %}
