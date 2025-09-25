@@ -29,10 +29,10 @@ jobs:
           POSTGRES_USER: ${{ secrets.DB_USER }}     # Utilisateur de base de données
           POSTGRES_DB: ${{ secrets.DB_NAME }}       # Nom de la base de données
         options: >-
-          --health-cmd pg_isready                   # Commande de vérification de santé
-          --health-interval 10s                     # Intervalle entre les vérifications
-          --health-timeout 5s                       # Délai d'attente pour chaque vérification
-          --health-retries 5                        # Nombre de tentatives avant échec
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         ports:
           - 5432:5432  # Exposition du port PostgreSQL standard
     
