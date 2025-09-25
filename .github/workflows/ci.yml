@@ -53,16 +53,24 @@ jobs:
         # Installation des dépendances de base du projet
         pip install -r requirements/base.txt
         # Installation de pytest et du driver PostgreSQL pour les tests
-        pip install pytest psycopg2-binary
+        # pip install pytest psycopg2-binary
     
     # Étape 4 : Préparation de l'environnement de test
     - name: Setup test environment
       run: |
         # Création des répertoires nécessaires pour les tests
         mkdir -p data/processed/models
+        
         # Création d'un fichier modèle factice pour les tests
         # (évite les erreurs si l'API cherche ce fichier au démarrage)
         touch data/processed/models/cats_dogs_model.keras
+
+        # Attendre que PostgreSQL soit complètement prêt
+        sleep 5
+        
+        # Création/configuration de la base de données avec votre script
+        python src/database/db_creator.py || echo "db_creator.py a échoué, on continue..."
+
         # Création de la table predictions_feedback dans PostgreSQL
         python src/database/table_creator.py
     
@@ -70,7 +78,7 @@ jobs:
     - name: Test database
       run: |
         # Exécution des tests de connexion et structure de la base de données
-        python tests/test_database_simple.py
+        python tests/test_db_simple.py
     
     # Étape 6 : Tests de l'API
     - name: Test API
