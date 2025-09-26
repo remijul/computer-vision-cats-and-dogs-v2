@@ -18,6 +18,10 @@
 
 ---
 
+## 📌 Introduction
+
+Il s'agit de la version 2 du projet, dans une série de 3 versions, la version 2 a pour objectif de développer une solution de monitoring (incluant le "human feedback loop") et la version 3 de proposer une solution ML Ops avancée (monitoring avancé, tests automatisés et déploiement continu).
+
 ## 🔍 Vue d'ensemble
 
 Cette version 2 étend le projet de classification d'images en ajoutant des fonctionnalités de monitoring avancées, une collecte de feedback utilisateur conforme RGPD, et un dashboard de surveillance en temps réel.
