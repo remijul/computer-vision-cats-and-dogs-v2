@@ -292,7 +292,7 @@ async def api_info():
         ]
     }
 
-@router.get("/monitoring", response_class=HTMLResponse, tags=["📊 monitoring"])
+@router.get("/monitoring", response_class=HTMLResponse, tags=["📊 Monitoring"])
 async def monitoring_dashboard(request: Request, db: Session = Depends(get_db)):
     """
     📊 Dashboard de monitoring
